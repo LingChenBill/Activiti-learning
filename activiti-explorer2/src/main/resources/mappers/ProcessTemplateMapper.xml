@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lc.activiti.mapper.ProcessTemplateMapper" >
+  <resultMap id="BaseResultMap" type="com.lc.activiti.pojo.ProcessTemplate" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="deptName" property="deptname" jdbcType="VARCHAR" />
+    <result column="processName" property="processname" jdbcType="VARCHAR" />
+    <result column="modelId" property="modelid" jdbcType="VARCHAR" />
+    <result column="createTime" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="updateTime" property="updatetime" jdbcType="TIMESTAMP" />
+    <result column="flowChartId" property="flowchartid" jdbcType="VARCHAR" />
+    <result column="isHaveNew" property="ishavenew" jdbcType="INTEGER" />
+    <result column="isTemplate" property="istemplate" jdbcType="INTEGER" />
+    <result column="alternateField1" property="alternatefield1" jdbcType="VARCHAR" />
+    <result column="alternateField2" property="alternatefield2" jdbcType="VARCHAR" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.lc.activiti.pojo.ProcessTemplate" extends="BaseResultMap" >
+    <result column="style" property="style" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, deptName, processName, modelId, createTime, updateTime, flowChartId, isHaveNew, 
+    isTemplate, alternateField1, alternateField2
+  </sql>
+  <sql id="Blob_Column_List" >
+    style
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from process_template
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from process_template
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.lc.activiti.pojo.ProcessTemplate" >
+    insert into process_template (id, deptName, processName, 
+      modelId, createTime, updateTime, 
+      flowChartId, isHaveNew, isTemplate, 
+      alternateField1, alternateField2, style
+      )
+    values (#{id,jdbcType=INTEGER}, #{deptname,jdbcType=VARCHAR}, #{processname,jdbcType=VARCHAR}, 
+      #{modelid,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP}, #{updatetime,jdbcType=TIMESTAMP}, 
+      #{flowchartid,jdbcType=VARCHAR}, #{ishavenew,jdbcType=INTEGER}, #{istemplate,jdbcType=INTEGER}, 
+      #{alternatefield1,jdbcType=VARCHAR}, #{alternatefield2,jdbcType=VARCHAR}, #{style,jdbcType=LONGVARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.lc.activiti.pojo.ProcessTemplate" >
+    insert into process_template
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="deptname != null" >
+        deptName,
+      </if>
+      <if test="processname != null" >
+        processName,
+      </if>
+      <if test="modelid != null" >
+        modelId,
+      </if>
+      <if test="createtime != null" >
+        createTime,
+      </if>
+      <if test="updatetime != null" >
+        updateTime,
+      </if>
+      <if test="flowchartid != null" >
+        flowChartId,
+      </if>
+      <if test="ishavenew != null" >
+        isHaveNew,
+      </if>
+      <if test="istemplate != null" >
+        isTemplate,
+      </if>
+      <if test="alternatefield1 != null" >
+        alternateField1,
+      </if>
+      <if test="alternatefield2 != null" >
+        alternateField2,
+      </if>
+      <if test="style != null" >
+        style,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="deptname != null" >
+        #{deptname,jdbcType=VARCHAR},
+      </if>
+      <if test="processname != null" >
+        #{processname,jdbcType=VARCHAR},
+      </if>
+      <if test="modelid != null" >
+        #{modelid,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="flowchartid != null" >
+        #{flowchartid,jdbcType=VARCHAR},
+      </if>
+      <if test="ishavenew != null" >
+        #{ishavenew,jdbcType=INTEGER},
+      </if>
+      <if test="istemplate != null" >
+        #{istemplate,jdbcType=INTEGER},
+      </if>
+      <if test="alternatefield1 != null" >
+        #{alternatefield1,jdbcType=VARCHAR},
+      </if>
+      <if test="alternatefield2 != null" >
+        #{alternatefield2,jdbcType=VARCHAR},
+      </if>
+      <if test="style != null" >
+        #{style,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.lc.activiti.pojo.ProcessTemplate" >
+    update process_template
+    <set >
+      <if test="deptname != null" >
+        deptName = #{deptname,jdbcType=VARCHAR},
+      </if>
+      <if test="processname != null" >
+        processName = #{processname,jdbcType=VARCHAR},
+      </if>
+      <if test="modelid != null" >
+        modelId = #{modelid,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        createTime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        updateTime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="flowchartid != null" >
+        flowChartId = #{flowchartid,jdbcType=VARCHAR},
+      </if>
+      <if test="ishavenew != null" >
+        isHaveNew = #{ishavenew,jdbcType=INTEGER},
+      </if>
+      <if test="istemplate != null" >
+        isTemplate = #{istemplate,jdbcType=INTEGER},
+      </if>
+      <if test="alternatefield1 != null" >
+        alternateField1 = #{alternatefield1,jdbcType=VARCHAR},
+      </if>
+      <if test="alternatefield2 != null" >
+        alternateField2 = #{alternatefield2,jdbcType=VARCHAR},
+      </if>
+      <if test="style != null" >
+        style = #{style,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.lc.activiti.pojo.ProcessTemplate" >
+    update process_template
+    set deptName = #{deptname,jdbcType=VARCHAR},
+      processName = #{processname,jdbcType=VARCHAR},
+      modelId = #{modelid,jdbcType=VARCHAR},
+      createTime = #{createtime,jdbcType=TIMESTAMP},
+      updateTime = #{updatetime,jdbcType=TIMESTAMP},
+      flowChartId = #{flowchartid,jdbcType=VARCHAR},
+      isHaveNew = #{ishavenew,jdbcType=INTEGER},
+      isTemplate = #{istemplate,jdbcType=INTEGER},
+      alternateField1 = #{alternatefield1,jdbcType=VARCHAR},
+      alternateField2 = #{alternatefield2,jdbcType=VARCHAR},
+      style = #{style,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.lc.activiti.pojo.ProcessTemplate" >
+    update process_template
+    set deptName = #{deptname,jdbcType=VARCHAR},
+      processName = #{processname,jdbcType=VARCHAR},
+      modelId = #{modelid,jdbcType=VARCHAR},
+      createTime = #{createtime,jdbcType=TIMESTAMP},
+      updateTime = #{updatetime,jdbcType=TIMESTAMP},
+      flowChartId = #{flowchartid,jdbcType=VARCHAR},
+      isHaveNew = #{ishavenew,jdbcType=INTEGER},
+      isTemplate = #{istemplate,jdbcType=INTEGER},
+      alternateField1 = #{alternatefield1,jdbcType=VARCHAR},
+      alternateField2 = #{alternatefield2,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
