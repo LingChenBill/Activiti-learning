@@ -76,5 +76,48 @@ public class UserAndGroupInUserTaskTest {
         identityService.deleteUser("henryyan");
     }
 
+    /**
+     * Function: 用户组包含多个用户时在用户任务中的应用。
+     * { 在一个用户任务被其中一个候选人签收之后，其他候选人同时失去拥有这个任务的权限。}
+     *
+     */
+    @Test
+    @Deployment(resources = {"user-group.bpmn20.xml"})
+    public void testUserTaskWithGroupContainsTwoUser() {
+        IdentityService identityService = activitiRule.getIdentityService();
+        User jackchen = identityService.newUser("jackchen");
+        jackchen.setFirstName("Jack");
+        jackchen.setLastName("Chen");
+        jackchen.setEmail("jackchen@163.com");
+
+        identityService.saveUser(jackchen);
+
+        // 把用户jackchen加入到组deptLeader中。
+        identityService.createMembership("jackchen", "deptLeader");
+
+        // 启动流程。
+        RuntimeService runtimeService = activitiRule.getRuntimeService();
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("userAndGroupInUserTask");
+        Assert.assertNotNull(processInstance);
+
+        TaskService taskService = activitiRule.getTaskService();
+        Task jackchenTask = taskService.createTaskQuery().taskCandidateUser("jackchen").singleResult();
+        logger.info("jackchenTask = {}", ToStringBuilder.reflectionToString(jackchenTask, ToStringStyle.JSON_STYLE));
+
+        Task henryyanTask = taskService.createTaskQuery().taskCandidateUser("henryyan").singleResult();
+        logger.info("henryyanTask = {}", ToStringBuilder.reflectionToString(henryyanTask, ToStringStyle.JSON_STYLE));
+        Assert.assertNotNull(henryyanTask);
+
+        // jackchen签收任务。
+        logger.info("jackenTask Id = {}", jackchenTask.getId());
+        taskService.claim(jackchenTask.getId(), "jackchen");
+
+        // 再次查询用户henryyan是否拥有刚刚的候选任务。
+
+        henryyanTask = taskService.createTaskQuery().taskCandidateUser("henryyan").singleResult();
+        Assert.assertNull(henryyanTask);
+
+    }
+
 
 }
