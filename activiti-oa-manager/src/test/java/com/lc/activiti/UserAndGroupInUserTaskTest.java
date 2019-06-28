@@ -5,7 +5,6 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.User;
-import org.activiti.engine.impl.test.AbstractTestCase;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.test.ActivitiRule;
@@ -67,17 +66,6 @@ public class UserAndGroupInUserTaskTest {
         taskService.complete(henryyanTask.getId());
     }
 
-    // test git.
-
-    @After
-    public void afterInvokeTestMethod() {
-        IdentityService identityService = activitiRule.getIdentityService();
-        // 删除用户组和用户.
-        identityService.deleteMembership("henryyan", "deptLeader");
-        identityService.deleteGroup("deptLeader");
-        identityService.deleteUser("henryyan");
-    }
-
     /**
      * Function: 用户组包含多个用户时在用户任务中的应用。
      * { 在一个用户任务被其中一个候选人签收之后，其他候选人同时失去拥有这个任务的权限。}
@@ -121,4 +109,12 @@ public class UserAndGroupInUserTaskTest {
 
     }
 
+    @After
+    public void afterInvokeTestMethod() {
+        IdentityService identityService = activitiRule.getIdentityService();
+        // 删除用户组和用户.
+        identityService.deleteMembership("henryyan", "deptLeader");
+        identityService.deleteGroup("deptLeader");
+        identityService.deleteUser("henryyan");
+    }
 }

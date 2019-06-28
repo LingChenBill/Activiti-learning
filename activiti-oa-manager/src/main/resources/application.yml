@@ -1,0 +1,29 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: activiti-explorer2
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/patent_sample?userUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: root
+    max-wait: 60000
+    min-idle: 15
+    initial-size: 15
+    validation-query: SELECT 1
+    test-on-borrow: false
+    test-while-idle: true
+    time-between-eviction-runs-millis: 60000
+  activiti:
+    check-process-definitions: false
+    database-schema-update: true
+  mvc:
+    view:
+      prefix: /WEB-INF/views/
+      suffix: .jsp
+# mybatis配置.
+mybatis:
+  typeAliasesPackage: com.lc.activiti.pojo
+  mapper-locations: classpath:mappers/*.xml
