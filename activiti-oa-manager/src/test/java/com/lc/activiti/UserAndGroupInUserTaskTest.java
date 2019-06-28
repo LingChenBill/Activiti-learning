@@ -67,6 +67,8 @@ public class UserAndGroupInUserTaskTest {
         taskService.complete(henryyanTask.getId());
     }
 
+    // test git.
+
     @After
     public void afterInvokeTestMethod() {
         IdentityService identityService = activitiRule.getIdentityService();
@@ -75,6 +77,5 @@ public class UserAndGroupInUserTaskTest {
         identityService.deleteGroup("deptLeader");
         identityService.deleteUser("henryyan");
     }
-
 
 }
