@@ -3,26 +3,28 @@ package com.lc.activiti.web;
 import com.lc.activiti.model.ProcessDefinitionModel;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.repository.DeploymentBuilder;
 import org.activiti.engine.repository.ProcessDefinition;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipInputStream;
 
 /**
  * Class: 部署流程控制层.
  *
  */
-//@RestController
-@Controller
+@RestController
 @RequestMapping(value = "/chapter05")
 public class DeploymentController {
 
@@ -30,23 +32,6 @@ public class DeploymentController {
 
     @Autowired
     private ProcessEngine processEngine;
-
-    @RequestMapping(value = "/process-list2")
-    public ModelAndView processList2() {
-        ModelAndView mv = new ModelAndView("chapter5/process-list");
-        RepositoryService repositoryService = processEngine.getRepositoryService();
-
-        List<ProcessDefinition> processDefinitionsList = repositoryService
-                .createProcessDefinitionQuery()
-                .listPage(0, 100);
-
-
-        String str = ToStringBuilder.reflectionToString(processDefinitionsList, ToStringStyle.JSON_STYLE);
-        mv.addObject("processDefinitionList", str);
-
-        return mv;
-
-    }
 
     @RequestMapping(value = "/process-list")
     @ResponseBody
@@ -61,6 +46,42 @@ public class DeploymentController {
         List<ProcessDefinitionModel> proList = getProcessDefinitionModels(processDefinitionsList);
 
         return proList;
+    }
+
+    /**
+     * 文件上传，并发布流程。
+     * { 文件格式为zip， bar， xml }
+     *
+     * @param file
+     * @return
+     */
+    @PostMapping(value = "uploadDeploy")
+    public ResponseEntity uploadDeploy(@RequestParam(value = "file") MultipartFile file) {
+        String filename = file.getOriginalFilename();
+
+        try {
+            InputStream inputStream = file.getInputStream();
+            String extension = FilenameUtils.getExtension(filename);
+
+            RepositoryService repositoryService = processEngine.getRepositoryService();
+            DeploymentBuilder deployment = repositoryService.createDeployment();
+
+            if ("zip".equals(extension) || "bar".equals(extension)) {
+                deployment.addZipInputStream(new ZipInputStream(inputStream));
+            } else if ("xml".equals(extension)) {
+                deployment.addInputStream(filename, inputStream);
+            } else {
+                logger.info("文件格式有问题，请重新选择！文件后缀为 = {}", extension);
+                return new ResponseEntity(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+            }
+
+            deployment.deploy();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return ResponseEntity.ok().build();
     }
 
     /**

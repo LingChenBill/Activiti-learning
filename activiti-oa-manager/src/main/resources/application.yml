@@ -19,10 +19,12 @@ spring:
   activiti:
     check-process-definitions: false
     database-schema-update: true
-  mvc:
-    view:
-      prefix: /WEB-INF/views/
-      suffix: .jsp
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 128KB
+      max-request-size: 128KB
+
 # mybatis配置.
 mybatis:
   typeAliasesPackage: com.lc.activiti.pojo
