@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8082
 
 spring:
   application:
@@ -8,7 +8,7 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://localhost:3306/patent_sample?userUnicode=true&characterEncoding=utf-8&useSSL=false
     username: root
-    password: root
+    password: Aa123456
     max-wait: 60000
     min-idle: 15
     initial-size: 15
