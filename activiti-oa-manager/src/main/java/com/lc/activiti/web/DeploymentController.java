@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -32,6 +33,9 @@ public class DeploymentController {
 
     @Autowired
     private ProcessEngine processEngine;
+
+    @Autowired
+    private RepositoryService repositoryService;
 
     @RequestMapping(value = "/process-list")
     @ResponseBody
@@ -83,6 +87,51 @@ public class DeploymentController {
 
         return ResponseEntity.ok().build();
     }
+
+    /**
+     * 读取流程资源(包括xml和图片文件都可以读取)。
+     * { http://localhost:8082/chapter05/read-resource?pdid=userAndGroupInUserTask:4:7506&resourceName=userAndGroupInUserTask.bpmn }
+     *
+     * @param processDefinitionId
+     * @param resouceName
+     * @param response
+     */
+    @RequestMapping(value = "/read-resource")
+    public void readResource(@RequestParam("pdid") String processDefinitionId,
+                             @RequestParam("resourceName") String resouceName,
+                             HttpServletResponse response) throws IOException {
+        ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
+                .processDefinitionId(processDefinitionId)
+                .singleResult();
+
+        // 通过接口读取资源流.
+        InputStream resourceAsStream = repositoryService.getResourceAsStream(processDefinition.getDeploymentId(), resouceName);
+
+
+        // 输出资源内容到相应对象。
+        byte[] b = new byte[1024];
+        int len = -1;
+
+        while ((len = resourceAsStream.read(b, 0, 1024)) != -1) {
+            response.getOutputStream().write(b, 0, len);
+        }
+
+    }
+
+    /**
+     * 删除部署.
+     *
+     * @param deploymentId
+     * @return
+     */
+    @RequestMapping(value = "/delete-deployment")
+    public ResponseEntity deleteProcessDefinition(@RequestParam("deploymentId") String deploymentId) {
+
+        repositoryService.deleteDeployment(deploymentId, true);
+
+        return ResponseEntity.ok().build();
+    }
+
 
     /**
      * 画面Bean变换。

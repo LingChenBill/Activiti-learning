@@ -8,7 +8,7 @@
         <property name="url" value="jdbc:mysql://localhost:3306/patent_sample?userUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false"/>
         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
         <property name="username" value="root"/>
-        <property name="password" value="root" />
+        <property name="password" value="Aa123456" />
     </bean>
 
     <!--创建数据源。-->
@@ -24,6 +24,14 @@
 
         <property name="activityFontName" value="宋体"/>
         <property name="labelFontName" value="宋体"/>
+
+        <!-- 自定义表单字段类型 -->
+        <property name="customFormTypes">
+            <list>
+                <bean class="com.lc.activiti.formType.JavascriptFormType"/>
+            </list>
+        </property>
+        <property name="history" value="full"/>
     </bean>
 
     <!--流程引擎。-->
