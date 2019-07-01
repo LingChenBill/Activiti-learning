@@ -47,7 +47,7 @@ public class LeaveDynamicFormTest {
                 .processDefinitionKey("leave")
                 .singleResult();
 
-        SimpleDateFormat sdf = new SimpleDateFormat();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         HashMap<String, String> variables = new HashMap<>();
         Calendar calendar = Calendar.getInstance();
         String startDate = sdf.format(calendar.getTime());
