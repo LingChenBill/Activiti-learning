@@ -1,6 +1,5 @@
 package com.lc.activiti.web;
 
-import com.lc.activiti.utils.UserUtil;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.User;
@@ -15,8 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpSession;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户登录 controller.
@@ -40,10 +40,10 @@ public class loginController {
      * @return
      */
     @PostMapping("/login")
-    public ResponseEntity login(@RequestParam("username") String username,
-                        @RequestParam("password") String password) {
+    public ResponseEntity<Map<String,Object>> login(@RequestParam("username") String username,
+                                                    @RequestParam("password") String password) {
 
-        logger.info("username = {}, password = {]", username, password);
+        logger.info("username = {}, password = {}", username, password);
 
         boolean checkpwd = identityService.checkPassword(username, password);
 
@@ -63,7 +63,10 @@ public class loginController {
 
 //            session.setAttribute("groupNames", ArrayUtils.toString(groupNames));
 
-            return ResponseEntity.ok().body(ArrayUtils.toString(groupNames));
+            Map<String, Object> map = new HashMap<String,Object>();
+            map.put("content", ArrayUtils.toString(groupNames));
+
+            return new ResponseEntity<>(map, HttpStatus.OK);
         } else {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }

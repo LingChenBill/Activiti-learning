@@ -18,7 +18,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipInputStream;
 
 /**
@@ -37,7 +39,7 @@ public class DeploymentController {
     @Autowired
     private RepositoryService repositoryService;
 
-    @RequestMapping(value = "/process-list")
+    @GetMapping(value = "/process-list")
     @ResponseBody
     public Object processList() {
         RepositoryService repositoryService = processEngine.getRepositoryService();
@@ -124,12 +126,15 @@ public class DeploymentController {
      * @param deploymentId
      * @return
      */
-    @RequestMapping(value = "/delete-deployment")
-    public ResponseEntity deleteProcessDefinition(@RequestParam("deploymentId") String deploymentId) {
+    @GetMapping(value = "/delete-deployment")
+    public ResponseEntity<Map<String,Object>> deleteProcessDefinition(@RequestParam("deploymentId") String deploymentId) {
 
         repositoryService.deleteDeployment(deploymentId, true);
 
-        return ResponseEntity.ok().build();
+        Map<String, Object> map = new HashMap<>();
+        map.put("status", HttpStatus.OK);
+
+        return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
 
