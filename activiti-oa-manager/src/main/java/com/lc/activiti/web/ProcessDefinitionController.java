@@ -3,9 +3,11 @@ package com.lc.activiti.web;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.lc.activiti.model.DynamicFormModel;
 import com.lc.activiti.model.FormDataModel;
 import org.activiti.engine.FormService;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.form.FormProperty;
 import org.activiti.engine.form.StartFormData;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -74,7 +76,10 @@ public class ProcessDefinitionController {
             FormDataModel formDataModel = new FormDataModel();
             BeanUtils.copyProperties(startFormData, formDataModel);
 
+            List<DynamicFormModel> dynamicFormModelList = getDynamicFormModels(startFormData);
+
             content.put("startFormData", formDataModel);
+            content.put("dynamicForm", dynamicFormModelList);
         }
 
         content.put("hasStartFormKey", hasStartFormKey);
@@ -83,6 +88,27 @@ public class ProcessDefinitionController {
 
         logger.info("content: = {}", ToStringBuilder.reflectionToString(content, ToStringStyle.JSON_STYLE));
         return new ResponseEntity<>(content, HttpStatus.OK);
+    }
+
+    /**
+     * 画面Bean转换.
+     *
+     * @param startFormData
+     * @return
+     */
+    private List<DynamicFormModel> getDynamicFormModels(StartFormData startFormData) {
+        List<DynamicFormModel> dynamicFormModelList = new ArrayList<>();
+
+
+        List<FormProperty> formProperties = startFormData.getFormProperties();
+        for (FormProperty formProperty : formProperties) {
+            DynamicFormModel formModel = new DynamicFormModel();
+            formModel.setId(formProperty.getId());
+            formModel.setName(formProperty.getName());
+            formModel.setTypeName(formProperty.getType().getName());
+            dynamicFormModelList.add(formModel);
+        }
+        return dynamicFormModelList;
     }
 
 }
