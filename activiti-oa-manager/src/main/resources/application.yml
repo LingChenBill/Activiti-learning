@@ -8,7 +8,7 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://localhost:3306/patent_sample?userUnicode=true&characterEncoding=utf-8&useSSL=false
     username: root
-    password: Aa123456
+    password: root
     max-wait: 60000
     min-idle: 15
     initial-size: 15
@@ -24,6 +24,13 @@ spring:
       enabled: true
       max-file-size: 128KB
       max-request-size: 128KB
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      indent_output: true
+      fail_on_empty_beans: false
+    deserialization:
+      fail_on_unknown_properties: false
 
 # mybatis配置.
 mybatis:

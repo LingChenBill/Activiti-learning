@@ -74,7 +74,7 @@ public class DeploymentController {
 
             if ("zip".equals(extension) || "bar".equals(extension)) {
                 deployment.addZipInputStream(new ZipInputStream(inputStream));
-            } else if ("xml".equals(extension)) {
+            } else if ("xml".equals(extension) || "bpmn".equals(extension)) {
                 deployment.addInputStream(filename, inputStream);
             } else {
                 logger.info("文件格式有问题，请重新选择！文件后缀为 = {}", extension);
