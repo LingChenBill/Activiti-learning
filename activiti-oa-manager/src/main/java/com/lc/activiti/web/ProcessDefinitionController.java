@@ -1,33 +1,29 @@
 package com.lc.activiti.web;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.lc.activiti.model.DynamicFormModel;
 import com.lc.activiti.model.FormDataModel;
+import com.lc.activiti.model.FormVariables;
+import com.lc.activiti.utils.UserUtil;
 import org.activiti.engine.FormService;
+import org.activiti.engine.IdentityService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.form.FormProperty;
 import org.activiti.engine.form.StartFormData;
+import org.activiti.engine.identity.User;
 import org.activiti.engine.repository.ProcessDefinition;
+import org.activiti.engine.runtime.ProcessInstance;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
 
 /**
  * 流程定义控制类.
@@ -44,6 +40,9 @@ public class ProcessDefinitionController {
 
     @Autowired
     private FormService formService;
+
+    @Autowired
+    private IdentityService identityService;
 
     /**
      * 读取启动流程的表单字段.
@@ -89,6 +88,57 @@ public class ProcessDefinitionController {
         logger.info("content: = {}", ToStringBuilder.reflectionToString(content, ToStringStyle.JSON_STYLE));
         return new ResponseEntity<>(content, HttpStatus.OK);
     }
+
+    /**
+     * 启动实例.
+     *
+     * @param formVariables
+     * @param request
+     * @return
+     */
+    @PostMapping(value = "/process-instance/start")
+    @RequestMapping(value = "/process-instance/start", method = RequestMethod.POST,
+            consumes = "application/json")
+    public ResponseEntity startProcessInstance(@RequestBody FormVariables formVariables, HttpServletRequest request) {
+        ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
+                .processDefinitionId(formVariables.getProcessDefinitionId())
+                .singleResult();
+
+        boolean hasStartFormKey = processDefinition.hasStartFormKey();
+
+        Map<String, String> formValues = new HashMap<>();
+
+        if(hasStartFormKey) {
+            Map<String, String[]> parameterMap = request.getParameterMap();
+            Set<Map.Entry<String, String[]>> entrySet = parameterMap.entrySet();
+            for (Map.Entry<String, String[]> entry : entrySet) {
+                String key = entry.getKey();
+                formValues.put(key, entry.getValue()[0]);
+            }
+        } else {
+            // 动态表单.
+            StartFormData startFormData = formService.getStartFormData(formVariables.getProcessDefinitionId());
+            Map<String, String> formPropertiesData = formVariables.getFormPropertiesData();
+            //
+            List<FormProperty> formProperties = startFormData.getFormProperties();
+            for (FormProperty formProperty : formProperties) {
+                String value = formPropertiesData.get(formProperty.getId());
+                formValues.put(formProperty.getId(), value);
+            }
+        }
+
+        // 获取当前登录的用户
+//        User user = UserUtil.getUserFromSession(request.getSession());
+        identityService.setAuthenticatedUserId(formVariables.getUserId());
+
+        // 提交表单字段并启动一个新的流程实例.
+        ProcessInstance processInstance = formService.submitStartFormData(formVariables.getProcessDefinitionId(), formValues);
+        logger.debug("start a process instance: ", processInstance);
+
+        return ResponseEntity.ok().build();
+
+    }
+
 
     /**
      * 画面Bean转换.

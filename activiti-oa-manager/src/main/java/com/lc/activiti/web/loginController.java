@@ -1,5 +1,6 @@
 package com.lc.activiti.web;
 
+import com.lc.activiti.utils.UserUtil;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.User;
@@ -9,11 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,9 +38,10 @@ public class loginController {
      * @param password
      * @return
      */
-    @PostMapping("/login")
+    @GetMapping("/login")
     public ResponseEntity<Map<String,Object>> login(@RequestParam("username") String username,
-                                                    @RequestParam("password") String password) {
+                                                    @RequestParam("password") String password,
+                                                    HttpSession session) {
 
         logger.info("username = {}, password = {}", username, password);
 
@@ -50,7 +50,7 @@ public class loginController {
         if (checkpwd) {
             // 读取用户信息.
             User user = identityService.createUserQuery().userId(username).singleResult();
-//            UserUtil.saveUserToSession(session, user);
+            UserUtil.saveUserToSession(session, user);
 
             // 读取用户角色.
             List<Group> groupList = identityService.createGroupQuery().groupMember(user.getId()).list();
@@ -61,7 +61,7 @@ public class loginController {
                 groupNames[i] = groupList.get(i).getName();
             }
 
-//            session.setAttribute("groupNames", ArrayUtils.toString(groupNames));
+            session.setAttribute("groupNames", ArrayUtils.toString(groupNames));
 
             Map<String, Object> map = new HashMap<String,Object>();
             map.put("content", ArrayUtils.toString(groupNames));
@@ -70,6 +70,20 @@ public class loginController {
         } else {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
+    }
+
+    /**
+     * 用户退出.
+     *
+     * @param session
+     */
+    @GetMapping(value = "/logout")
+    public ResponseEntity logout(HttpSession session) {
+        session.removeAttribute("user");
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("status", HttpStatus.OK);
+        return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
 }
