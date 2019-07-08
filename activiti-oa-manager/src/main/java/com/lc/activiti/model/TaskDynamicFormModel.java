@@ -12,4 +12,7 @@ public class TaskDynamicFormModel extends DynamicFormModel {
 
     // 表单值.
     public String value;
+
+    // 表单元素是否可编辑。
+    public boolean isWritable;
 }

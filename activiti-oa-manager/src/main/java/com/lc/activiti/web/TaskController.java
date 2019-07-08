@@ -1,5 +1,6 @@
 package com.lc.activiti.web;
 
+import com.lc.activiti.model.FormVariables;
 import com.lc.activiti.model.TaskDynamicFormModel;
 import com.lc.activiti.model.TaskModel;
 import org.activiti.engine.FormService;
@@ -81,6 +82,7 @@ public class TaskController {
         TaskFormData taskFormData = formService.getTaskFormData(taskId);
 
         Map<String,Object> content = new HashMap<>();
+        Map<String,Object> formMap = new HashMap<>();
         if (StringUtils.isNotEmpty(taskFormData.getFormKey())) {
             Object renderedTaskForm = formService.getRenderedTaskForm(taskId);
             Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
@@ -99,16 +101,43 @@ public class TaskController {
                 model.setName(formProperty.getName());
                 model.setTypeName(formProperty.getType().getName());
                 model.setValue(formProperty.getValue());
+
+                // 该表单是否可编辑。
+                model.setWritable(formProperty.isWritable());
                 modelList.add(model);
+
+                // 表单值传递。
+                formMap.put(formProperty.getId(), formProperty.getValue());
             }
 
             content.put("taskId", taskId);
             content.put("taskFormdata", modelList);
+            content.put("formMap", formMap);
+
         }
 
         return new ResponseEntity<>(content, HttpStatus.OK);
     }
 
+    @PostMapping("/complete")
+    public ResponseEntity completeTask(@RequestBody FormVariables formVariables) {
+
+        TaskFormData taskFormData = formService.getTaskFormData(formVariables.getTaskId());
+
+        List<FormProperty> formProperties = taskFormData.getFormProperties();
+
+        Map<String, String> formValues = new HashMap<>();
+        for (FormProperty formProperty : formProperties) {
+            if (formProperty.isWritable()) {
+                formValues.put(formProperty.getId(), formVariables.getFormPropertiesData().get(formProperty.getId()));
+            }
+        }
+
+        // 提交用户任务表单并完成任务。
+        formService.submitTaskFormData(formVariables.getTaskId(), formValues);
+
+        return ResponseEntity.ok().build();
+    }
 
 
 }

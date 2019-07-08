@@ -16,6 +16,9 @@ public class FormVariables {
     // 流程定义ID.
     private String processDefinitionId;
 
+    // 任务ID.
+    private String taskId;
+
     // 表单键值对.
     private Map<String, String> formPropertiesData;
 

@@ -21,6 +21,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -156,6 +159,36 @@ public class ProcessDefinitionController {
             dynamicFormModelList.add(formModel);
         }
         return dynamicFormModelList;
+    }
+
+    /**
+     * 读取流程资源xml。
+     *
+     * @param processDefinitionId
+     * @param resourceName
+     * @param response
+     * @return
+     * @throws IOException
+     */
+    @GetMapping("/read-resource")
+    public ResponseEntity readResource(@RequestParam("pdid") String processDefinitionId,
+                                       @RequestParam("resourceName") String resourceName,
+                                       HttpServletResponse response) throws IOException {
+        ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
+                .processDefinitionId(processDefinitionId)
+                .singleResult();
+
+        InputStream resourceAsStream = repositoryService.getResourceAsStream(processDefinition.getDeploymentId(), resourceName);
+
+        // 输出接口读取资源流
+        byte[] b = new byte[1024];
+        int len = -1;
+
+        while ((len = resourceAsStream.read(b, 0, 1024)) != -1) {
+            response.getOutputStream().write(b, 0, len);
+        }
+
+        return ResponseEntity.ok().build();
     }
 
 }
