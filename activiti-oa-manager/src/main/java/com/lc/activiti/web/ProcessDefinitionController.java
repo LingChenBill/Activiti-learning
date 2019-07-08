@@ -3,13 +3,11 @@ package com.lc.activiti.web;
 import com.lc.activiti.model.DynamicFormModel;
 import com.lc.activiti.model.FormDataModel;
 import com.lc.activiti.model.FormVariables;
-import com.lc.activiti.utils.UserUtil;
 import org.activiti.engine.FormService;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.form.FormProperty;
 import org.activiti.engine.form.StartFormData;
-import org.activiti.engine.identity.User;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -97,8 +95,7 @@ public class ProcessDefinitionController {
      * @return
      */
     @PostMapping(value = "/process-instance/start")
-    @RequestMapping(value = "/process-instance/start", method = RequestMethod.POST,
-            consumes = "application/json")
+    @RequestMapping(value = "/process-instance/start", method = RequestMethod.POST)
     public ResponseEntity startProcessInstance(@RequestBody FormVariables formVariables, HttpServletRequest request) {
         ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
                 .processDefinitionId(formVariables.getProcessDefinitionId())
@@ -135,7 +132,7 @@ public class ProcessDefinitionController {
         ProcessInstance processInstance = formService.submitStartFormData(formVariables.getProcessDefinitionId(), formValues);
         logger.debug("start a process instance: ", processInstance);
 
-        return ResponseEntity.ok().build();
+        return new ResponseEntity(HttpStatus.OK);
 
     }
 

@@ -31,6 +31,9 @@ spring:
       fail_on_empty_beans: false
     deserialization:
       fail_on_unknown_properties: false
+  devtools:
+    restart:
+      enabled: true
 
 # mybatis配置.
 mybatis:

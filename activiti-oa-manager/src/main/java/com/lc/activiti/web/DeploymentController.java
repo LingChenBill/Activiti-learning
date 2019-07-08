@@ -127,14 +127,10 @@ public class DeploymentController {
      * @return
      */
     @GetMapping(value = "/delete-deployment")
-    public ResponseEntity<Map<String,Object>> deleteProcessDefinition(@RequestParam("deploymentId") String deploymentId) {
+    public void deleteProcessDefinition(@RequestParam("deploymentId") String deploymentId) {
 
         repositoryService.deleteDeployment(deploymentId, true);
 
-        Map<String, Object> map = new HashMap<>();
-        map.put("status", HttpStatus.OK);
-
-        return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
 

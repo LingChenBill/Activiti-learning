@@ -50,7 +50,7 @@ public class loginController {
         if (checkpwd) {
             // 读取用户信息.
             User user = identityService.createUserQuery().userId(username).singleResult();
-            UserUtil.saveUserToSession(session, user);
+//            UserUtil.saveUserToSession(session, user);
 
             // 读取用户角色.
             List<Group> groupList = identityService.createGroupQuery().groupMember(user.getId()).list();
@@ -61,7 +61,7 @@ public class loginController {
                 groupNames[i] = groupList.get(i).getName();
             }
 
-            session.setAttribute("groupNames", ArrayUtils.toString(groupNames));
+//            session.setAttribute("groupNames", ArrayUtils.toString(groupNames));
 
             Map<String, Object> map = new HashMap<String,Object>();
             map.put("content", ArrayUtils.toString(groupNames));
@@ -78,12 +78,9 @@ public class loginController {
      * @param session
      */
     @GetMapping(value = "/logout")
-    public ResponseEntity logout(HttpSession session) {
+    public void logout(HttpSession session) {
+        // TODO:自己业务的当前用户处理.
         session.removeAttribute("user");
-
-        Map<String, Object> map = new HashMap<>();
-        map.put("status", HttpStatus.OK);
-        return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
 }
