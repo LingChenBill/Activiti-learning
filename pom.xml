@@ -26,13 +26,14 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <activiti.version>6.0.0</activiti.version>
         <mybatis-spring-boot>1.2.0</mybatis-spring-boot>
-        <jetty.version>8.1.11.v20130520</jetty.version>
+        <!--<jetty.version>8.1.11.v20130520</jetty.version>-->
         <commons-io.version>2.4</commons-io.version>
     </properties>
 	
     <modules>
         <module>activiti-explorer2</module>
         <module>activiti-oa-manager</module>
+        <module>activiti-multi-instance</module>
     </modules>
 
 </project>

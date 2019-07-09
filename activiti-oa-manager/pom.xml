@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>activiti-oa-manager</artifactId>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <!-- 依赖定义 -->
     <dependencies>
@@ -140,18 +140,18 @@
         </dependency>
 
         <!-- jetty -->
-        <dependency>
-            <groupId>org.eclipse.jetty.aggregate</groupId>
-            <artifactId>jetty-webapp</artifactId>
-            <version>${jetty.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-jsp</artifactId>
-            <version>${jetty.version}</version>
-            <scope>test</scope>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.eclipse.jetty.aggregate</groupId>-->
+            <!--<artifactId>jetty-webapp</artifactId>-->
+            <!--<version>${jetty.version}</version>-->
+            <!--<scope>test</scope>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.eclipse.jetty</groupId>-->
+            <!--<artifactId>jetty-jsp</artifactId>-->
+            <!--<version>${jetty.version}</version>-->
+            <!--<scope>test</scope>-->
+        <!--</dependency>-->
         <!-- WEB end -->
 
         <!-- Jackson JSON Mapper -->

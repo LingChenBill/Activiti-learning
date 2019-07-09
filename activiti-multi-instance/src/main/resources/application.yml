@@ -1,0 +1,41 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: activiti-multi-instance
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/patent_sample?userUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: Aa123456
+    max-wait: 60000
+    min-idle: 15
+    initial-size: 15
+    validation-query: SELECT 1
+    test-on-borrow: false
+    test-while-idle: true
+    time-between-eviction-runs-millis: 60000
+  activiti:
+    check-process-definitions: false
+    database-schema-update: true
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 128KB
+      max-request-size: 128KB
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      indent_output: true
+      fail_on_empty_beans: false
+    deserialization:
+      fail_on_unknown_properties: false
+  devtools:
+    restart:
+      enabled: true
+
+# mybatis配置.
+mybatis:
+  typeAliasesPackage: com.lc.activiti.pojo
+  mapper-locations: classpath:mappers/*.xml
