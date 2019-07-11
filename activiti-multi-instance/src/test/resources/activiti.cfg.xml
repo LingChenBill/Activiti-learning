@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans   http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--创建数据源。-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="url" value="jdbc:mysql://localhost:3306/activiti_shareniu?userUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false"/>
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="username" value="root"/>
+        <property name="password" value="Aa123456" />
+    </bean>
+
+    <!--创建数据源。-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--自定义配置器。-->
+    <bean id="myProcessEngineConfigurator" class="com.lc.activiti.configurator.MyConfigurator"/>
+
+    <!--流程引擎配置。-->
+    <bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="transactionManager" ref="transactionManager"/>
+        <!--<property name="databaseSchemaUpdate" value="true"/>-->
+
+        <!--关闭ServiceLoader功能。-->
+        <property name="enableConfiguratorServiceLoader" value="false"/>
+
+        <property name="configurators">
+            <list>
+                <ref bean="myProcessEngineConfigurator"/>
+            </list>
+        </property>
+
+        <property name="activityFontName" value="宋体"/>
+        <property name="labelFontName" value="宋体"/>
+
+        <!-- 自定义表单字段类型 -->
+        <!--<property name="customFormTypes">-->
+            <!--<list>-->
+                <!--<bean class="com.lc.activiti.formType.JavascriptFormType"/>-->
+            <!--</list>-->
+        <!--</property>-->
+        <property name="history" value="full"/>
+    </bean>
+
+    <!--流程引擎。-->
+    <bean id="processEngine" class="org.activiti.spring.ProcessEngineFactoryBean">
+        <property name="processEngineConfiguration" ref="processEngineConfiguration"/>
+    </bean>
+
+    <!--流程服务注入。-->
+    <bean id="runtimeService" factory-bean="processEngine" factory-method="getRuntimeService"/>
+    <bean id="repositoryService" factory-bean="processEngine" factory-method="getRepositoryService"/>
+    <bean id="formService" factory-bean="processEngine" factory-method="getFormService"/>
+    <bean id="taskService" factory-bean="processEngine" factory-method="getTaskService"/>
+    <bean id="historyService" factory-bean="processEngine" factory-method="getHistoryService"/>
+
+    <!--将流程引擎以activitiRule的方式注入使用。-->
+    <bean id="activitiRule" class="org.activiti.engine.test.ActivitiRule">
+        <property name="processEngine" ref="processEngine"/>
+    </bean>
+
+</beans>
