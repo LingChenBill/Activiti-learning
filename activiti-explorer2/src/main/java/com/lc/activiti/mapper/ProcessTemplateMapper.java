@@ -2,6 +2,8 @@ package com.lc.activiti.mapper;
 
 import com.lc.activiti.pojo.ProcessTemplate;
 
+import java.util.List;
+
 public interface ProcessTemplateMapper {
     int deleteByPrimaryKey(Integer id);
 
@@ -10,6 +12,8 @@ public interface ProcessTemplateMapper {
     int insertSelective(ProcessTemplate record);
 
     ProcessTemplate selectByPrimaryKey(Integer id);
+
+    List<ProcessTemplate> selectProcessTemplateList();
 
     int updateByPrimaryKeySelective(ProcessTemplate record);
 
