@@ -40,15 +40,16 @@ public class ModelController {
      * @return
      * @throws UnsupportedEncodingException
      */
-    @GetMapping("/createModel/{processTemplateId}")
-    public ResponseEntity<Object> createModel(@PathVariable String processTemplateId) throws UnsupportedEncodingException {
+//    @GetMapping("/createModel/{processTemplateId}")
+    @GetMapping("/create")
+    public ResponseEntity<Object> createModel() throws UnsupportedEncodingException {
 
-        // 查询流程模板.
-        int processTemplateIdInt = Integer.parseInt(processTemplateId);
-        ProcessTemplate processTemplate = processTemplateService.selectProcessTemplateById(processTemplateIdInt);
-
-        if (ObjectUtils.isEmpty(processTemplate)
-                || ObjectUtils.isEmpty(processTemplate.getModelid())) {
+//        // 查询流程模板.
+//        int processTemplateIdInt = Integer.parseInt(processTemplateId);
+//        ProcessTemplate processTemplate = processTemplateService.selectProcessTemplateById(processTemplateIdInt);
+//
+//        if (ObjectUtils.isEmpty(processTemplate)
+//                || ObjectUtils.isEmpty(processTemplate.getModelid())) {
 
             RepositoryService repositoryService = processEngine.getRepositoryService();
             // 初始化一个空模型.
@@ -82,7 +83,7 @@ public class ModelController {
 
             // 保存模型.
             repositoryService.addModelEditorSource(id, editorNode.toString().getBytes("utf-8"));
-        }
+//        }
 
         return ResponseEntity.ok().build();
     }

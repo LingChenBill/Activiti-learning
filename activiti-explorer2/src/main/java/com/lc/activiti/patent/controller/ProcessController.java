@@ -6,6 +6,7 @@ import com.lc.activiti.service.ProcessTemplateService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.repository.Model;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -67,7 +68,10 @@ public class ProcessController {
             processModel.setCreateTime(processTemplate.getCreatetime());
 
             for (Model model : modelList) {
-                if (processModel.getModelId().equals(model.getId())) {
+                if (model.getId().equals(processModel.getModelId())) {
+                    processModel.setModelId(model.getId());
+                    break;
+                } else if (!StringUtils.isEmpty(model.getId()) && StringUtils.isEmpty(processModel.getModelId())) {
                     processModel.setModelId(model.getId());
                     break;
                 }
