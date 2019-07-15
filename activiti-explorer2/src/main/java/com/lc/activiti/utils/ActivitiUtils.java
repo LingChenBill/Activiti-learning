@@ -1,13 +1,13 @@
 package com.lc.activiti.utils;
 
-import org.activiti.bpmn.model.ExclusiveGateway;
-import org.activiti.bpmn.model.GraphicInfo;
-import org.activiti.bpmn.model.SequenceFlow;
-import org.activiti.bpmn.model.UserTask;
+import org.activiti.bpmn.converter.BpmnXMLConverter;
+import org.activiti.bpmn.model.*;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import java.io.*;
+import java.util.List;
 
 /**
  * Activiti流程处理工具类。
@@ -87,7 +87,7 @@ public class ActivitiUtils {
      * @param height
      * @return
      */
-    public static GraphicInfo gegenerateGraphicInfo(double x, double y,
+    public static GraphicInfo generateGraphicInfo(double x, double y,
                                                      double width, double height) {
         GraphicInfo graphicInfo1 = new GraphicInfo();
         graphicInfo1.setWidth(width);
@@ -95,5 +95,53 @@ public class ActivitiUtils {
         graphicInfo1.setX(x);
         graphicInfo1.setY(y);
         return graphicInfo1;
+    }
+
+    /**
+     * 修正流程图的绘图信息(起始点信息).
+     * @param model
+     * @return
+     */
+    public static BpmnModel fixGraphicInfo(BpmnModel model) {
+        for(org.activiti.bpmn.model.Process p : model.getProcesses()) {
+            for(FlowElement e : p.getFlowElements()) {
+                if (e instanceof SequenceFlow) {
+                    /**
+                     * 数据加工任务的自定义组件 与顺序流箭头连接后，箭头的起始位置没有被保存。导致图片导出时报错（数组越界）
+                     * 在此手动补充添加箭头的起始位置
+                     */
+                    List<GraphicInfo> infos = model.getFlowLocationGraphicInfo(e.getId());
+                    GraphicInfo incomingGI = model.getGraphicInfo(((SequenceFlow) e).getSourceRef());
+                    GraphicInfo outgoingGI = model.getGraphicInfo(((SequenceFlow) e).getTargetRef());
+                    if (infos.size() < 2) {
+                        infos.clear();
+                        infos.add(generateGraphicInfo(incomingGI.getX(), incomingGI.getY(), 30, 30));
+                        infos.add(generateGraphicInfo(outgoingGI.getX(), outgoingGI.getY(), 30, 30));
+                    }
+                }
+            }
+        }
+        return model;
+    }
+
+    /**
+     * 将流程图模型 转换为xml再转换回Model
+     * 应对图片导出时的瑕疵
+     * @param model
+     * @return
+     * @throws UnsupportedEncodingException
+     * @throws XMLStreamException
+     */
+    public static BpmnModel refreshXml(BpmnModel model) throws UnsupportedEncodingException, XMLStreamException {
+        BpmnXMLConverter bpmnXMLConverter = new BpmnXMLConverter();
+        String bpmn20Xml = new String(bpmnXMLConverter.convertToXML(model), "UTF-8");
+
+        InputStream stream = new ByteArrayInputStream(bpmn20Xml.getBytes("UTF-8"));
+        InputStreamReader in = new InputStreamReader(stream, "UTF-8");
+
+        XMLInputFactory xif = XMLInputFactory.newInstance();
+        XMLStreamReader xtr = xif.createXMLStreamReader(in);
+
+        return bpmnXMLConverter.convertToBpmnModel(xtr);
     }
 }
