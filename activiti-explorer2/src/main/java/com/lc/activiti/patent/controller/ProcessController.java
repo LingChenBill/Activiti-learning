@@ -128,20 +128,13 @@ public class ProcessController {
 
             ActivitiUtils.writeToLocal("C:\\Users\\Administrator\\Downloads\\images\\" + processId + "_old.png", inputStream0);
 
-            SubProcess subProcess = null;
             String tempId = null;
             String tempEndId = null;
-            UserTask translationUserTask = null;
-            List<SequenceFlow> translationUserTaskOutgoingFlows = null;
-
 
             for (FlowElement element: processes.get(0).getFlowElements()) {
                 logger.info("element id = {}, name = {}", element.getId(), element.getName());
                 if ("译腾".equals(element.getName())) {
                     tempId = element.getId();
-                    //subProcess = (SubProcess)element.clone();
-                    // translationUserTask = (UserTask)element;
-                    // List<SequenceFlow> outgoingFlows = translationUserTask.getOutgoingFlows();
                 } else if ("拆分".equals(element.getName())) {
                     tempEndId = element.getId();
                 }
@@ -153,79 +146,69 @@ public class ProcessController {
                 if (e instanceof SequenceFlow) {
                     SequenceFlow flow = (SequenceFlow)e;
                     if (flow.getSourceRef().equals(tempId)) {
-                        flow.setTargetRef("tranTask1");
+                        flow.setTargetRef("splitExclusiveGate");
                     } else if (flow.getTargetRef().equals("split-project")) {
-                        flow.setSourceRef("tranTask1");
+                        flow.setSourceRef("splitExclusiveGate");
                     }
                 }
             }
+
+            // 排他网关.
+            ExclusiveGateway exclusiveGateway = ActivitiUtils.createExclusiveGateway("splitExclusiveGate");
+            GraphicInfo gateGraphicInfo = ActivitiUtils.generateGraphicInfo(520.0, 150.0, 40.0, 40.0);
+            List<SequenceFlow> gateOutgoingFlows = new ArrayList<>();
 
             // 添加拆分节点.
             int splitNumbers = Integer.valueOf(splitNum);
             for (int i = 1; i <= splitNumbers; i++) {
 
+                // 拆分:翻译任务.
                 UserTask tranTask = ActivitiUtils.createUserTask("tranTask" + i, "翻译任务" + i, null);
-//                UserTask tranTask2 = ActivitiUtils.createUserTask("tranTask2", "翻译任务2", null);
-                GraphicInfo graphicInfoSp = ActivitiUtils.generateGraphicInfo(600.0, 35.0 + 75 * (i - 0), 80.0, 70.0);
-//                GraphicInfo graphicInfoSp2 = ActivitiUtils.generateGraphicInfo(600.0, 110.0, 80.0, 70.0);
+                GraphicInfo graphicInfoSp = ActivitiUtils.generateGraphicInfo(630.0, 0.0 + 70 * (i - 0), 80.0, 60.0);
 
-                SequenceFlow flow = ActivitiUtils.createSequenceFlow("tranTask" + i, tempEndId);
-                List<GraphicInfo> graphicInfoList  = new ArrayList<>();
-                graphicInfoList.add(ActivitiUtils.generateGraphicInfo(490.0, 175.0, 30, 30));
-                graphicInfoList.add(ActivitiUtils.generateGraphicInfo(645.0, 175.0, 30, 30));
+                // 拆分:内控.
+                UserTask controlTask = ActivitiUtils.createUserTask("controlTask" + i, "内控" + i, null);
+                GraphicInfo conGraphicInfo = ActivitiUtils.generateGraphicInfo(770.0, 0.0 + 70 * (i - 0), 80.0, 60.0);
 
-                tranTask.setOutgoingFlows(Arrays.asList(flow));
+                // 顺序流线(tranTask -> controlTask).
+                SequenceFlow tran2conFlow = ActivitiUtils.createSequenceFlow("tranTask" + i, "controlTask" + i);
+                List<GraphicInfo> tran2conGraphicInfoList  = new ArrayList<>();
+                tran2conGraphicInfoList.add(ActivitiUtils.generateGraphicInfo(490.0, 175.0, 30, 30));
+                tran2conGraphicInfoList.add(ActivitiUtils.generateGraphicInfo(645.0, 175.0, 30, 30));
+
+                tranTask.setOutgoingFlows(Arrays.asList(tran2conFlow));
+                controlTask.setIncomingFlows(Arrays.asList(tran2conFlow));
 
                 processes.get(0).addFlowElement(tranTask);
-                processes.get(0).addFlowElement(flow);
+                processes.get(0).addFlowElement(tran2conFlow);
 
+                // 顺序流线(controlTask -> tempEndId).
+                SequenceFlow con2TempEndFlow = ActivitiUtils.createSequenceFlow("controlTask" + i, tempEndId);
+                List<GraphicInfo> con2TempEndGraphicInfoList  = new ArrayList<>();
+                con2TempEndGraphicInfoList.add(ActivitiUtils.generateGraphicInfo(490.0, 175.0, 30, 30));
+                con2TempEndGraphicInfoList.add(ActivitiUtils.generateGraphicInfo(645.0, 175.0, 30, 30));
 
-                if (i > 1) {
-                    UserTask translation = (UserTask)processes.get(0).getFlowElement(tempId);
-                    SequenceFlow flowAdd = ActivitiUtils.createSequenceFlow(tempId, "tranTask" + i);
-                    translation.getOutgoingFlows().add(flowAdd);
-                    processes.get(0).addFlowElement(flowAdd);
-                }
+                controlTask.setOutgoingFlows(Arrays.asList(con2TempEndFlow));
+
+                processes.get(0).addFlowElement(controlTask);
+                processes.get(0).addFlowElement(con2TempEndFlow);
+
+                // 排他网关流程线.
+                SequenceFlow flowAdd = ActivitiUtils.createSequenceFlow("splitExclusiveGate", "tranTask" + i);
+                gateOutgoingFlows.add(flowAdd);
+                processes.get(0).addFlowElement(flowAdd);
 
                 bpmnModel.addGraphicInfo(tranTask.getId(), graphicInfoSp);
-                bpmnModel.addFlowGraphicInfoList(flow.getId(), graphicInfoList);
+                bpmnModel.addGraphicInfo(controlTask.getId(), conGraphicInfo);
+                bpmnModel.addFlowGraphicInfoList(tran2conFlow.getId(), tran2conGraphicInfoList);
+                bpmnModel.addFlowGraphicInfoList(con2TempEndFlow.getId(), con2TempEndGraphicInfoList);
             }
 
+            // 排他网关.
+            exclusiveGateway.setOutgoingFlows(gateOutgoingFlows);
+            processes.get(0).addFlowElement(exclusiveGateway);
+            bpmnModel.addGraphicInfo(exclusiveGateway.getId(), gateGraphicInfo);
 
-
-            // 不循环,手动添加节点.--------
-//            UserTask tranTask = ActivitiUtils.createUserTask("tranTask1", "翻译任务1", null);
-//            UserTask tranTask2 = ActivitiUtils.createUserTask("tranTask2", "翻译任务2", null);
-//            GraphicInfo graphicInfoSp = ActivitiUtils.generateGraphicInfo(600.0, 35.0, 80.0, 70.0);
-//            GraphicInfo graphicInfoSp2 = ActivitiUtils.generateGraphicInfo(600.0, 110.0, 80.0, 70.0);
-//
-//
-//            SequenceFlow flow1 = ActivitiUtils.createSequenceFlow("tranTask1", "split-project");
-//            List<GraphicInfo> graphicInfoList1=new ArrayList<>();
-//            graphicInfoList1.add(ActivitiUtils.generateGraphicInfo(490.0, 175.0, 30, 30));
-//            graphicInfoList1.add(ActivitiUtils.generateGraphicInfo(645.0, 175.0, 30, 30));
-//
-//            SequenceFlow flow2 = ActivitiUtils.createSequenceFlow("translation", "tranTask2");
-//            SequenceFlow flow3 = ActivitiUtils.createSequenceFlow("tranTask2", "split-project");
-//
-//            tranTask.setOutgoingFlows(Arrays.asList(flow1));
-//            tranTask2.setIncomingFlows(Arrays.asList(flow2));
-//            tranTask2.setOutgoingFlows(Arrays.asList(flow3));
-//            processes.get(0).addFlowElement(tranTask);
-//            processes.get(0).addFlowElement(tranTask2);
-//
-//            processes.get(0).addFlowElement(flow1);
-//            processes.get(0).addFlowElement(flow2);
-//            processes.get(0).addFlowElement(flow3);
-//            UserTask translation = (UserTask)processes.get(0).getFlowElement("translation");
-//            translation.getOutgoingFlows().add(flow2);
-//
-//            bpmnModel.addGraphicInfo(tranTask.getId(), graphicInfoSp);
-//            bpmnModel.addGraphicInfo(tranTask2.getId(), graphicInfoSp2);
-//            bpmnModel.addFlowGraphicInfoList(flow1.getId(), graphicInfoList1);
-//            bpmnModel.addFlowGraphicInfoList(flow2.getId(), graphicInfoList1);
-//            bpmnModel.addFlowGraphicInfoList(flow3.getId(), graphicInfoList1);
-            // 不循环,手动添加节点.--------
 
             repositoryService.validateProcess(bpmnModel);
 
