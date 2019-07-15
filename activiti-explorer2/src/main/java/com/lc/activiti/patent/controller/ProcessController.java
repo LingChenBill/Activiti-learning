@@ -225,6 +225,7 @@ public class ProcessController {
 
 
             // 修改的流程模型重新部署发布.
+            // addString:通过字符串方式部署流程文档。
             byte[] bytes = new BpmnXMLConverter().convertToXML(bpmnModel);
 
             Deployment deploy = repositoryService.createDeployment()
