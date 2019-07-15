@@ -7,11 +7,13 @@ import com.lc.activiti.pojo.ProcessTemplate;
 import com.lc.activiti.service.ProcessTemplateService;
 import com.lc.activiti.utils.ActivitiUtils;
 import com.sun.deploy.net.HttpResponse;
+import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.*;
 import org.activiti.bpmn.model.Process;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.Model;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.apache.commons.lang3.StringUtils;
@@ -220,6 +222,17 @@ public class ProcessController {
                     processEngine.getProcessEngineConfiguration().getClassLoader(), 1.0 );
 
             ActivitiUtils.writeToLocal("C:\\Users\\Administrator\\Downloads\\images\\" + processId + ".png", inputStream);
+
+
+            // 修改的流程模型重新部署发布.
+            byte[] bytes = new BpmnXMLConverter().convertToXML(bpmnModel);
+
+            Deployment deploy = repositoryService.createDeployment()
+                    .name("split-process.bpmn20.xml")
+                    .addString("split-process.bpmn20.xml", new String(bytes, "UTF-8"))
+                    .deploy();
+            logger.info("deploy id = {}, name = {}", deploy.getId(), deploy.getName());
+
 
         } catch (Exception e) {
             e.printStackTrace();
