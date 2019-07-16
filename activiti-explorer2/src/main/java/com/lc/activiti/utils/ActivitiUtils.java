@@ -39,8 +39,9 @@ public class ActivitiUtils {
      * @param to
      * @return
      */
-    public static SequenceFlow createSequenceFlow(String from, String to) {
+    public static SequenceFlow createSequenceFlow(String id, String from, String to) {
         SequenceFlow flow = new SequenceFlow();
+        flow.setId(id);
         flow.setSourceRef(from);
         flow.setTargetRef(to);
         return flow;
