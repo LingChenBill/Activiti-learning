@@ -57,8 +57,8 @@ public class ProcessController {
     @Autowired
     private HistoryService historyService;
 
-    @Autowired
-    private RuntimeService runtimeService;
+//    @Autowired
+//    private RuntimeService runtimeService;
 
     /**
      * 获取流程列表.
@@ -70,8 +70,8 @@ public class ProcessController {
 
         Map<String, Object> content = new HashMap<>();
 
-        RepositoryService repositoryService = processEngine.getRepositoryService();
-        List<Model> modelList = repositoryService.createModelQuery().list();
+        // RepositoryService repositoryService = processEngine.getRepositoryService();
+        // List<Model> modelList = repositoryService.createModelQuery().list();
 
         // 流程列表.
         List<ProcessModel> processModelList = new ArrayList<>();
@@ -86,15 +86,15 @@ public class ProcessController {
             processModel.setProcessName(processTemplate.getProcessname());
             processModel.setCreateTime(processTemplate.getCreatetime());
 
-            for (Model model : modelList) {
-                if (model.getId().equals(processModel.getModelId())) {
-                    processModel.setModelId(model.getId());
-                    break;
-                } else if (!StringUtils.isEmpty(model.getId()) && StringUtils.isEmpty(processModel.getModelId())) {
-                    processModel.setModelId(model.getId());
-                    break;
-                }
-            }
+//            for (Model model : modelList) {
+//                if (model.getId().equals(processModel.getModelId())) {
+//                    processModel.setModelId(model.getId());
+//                    break;
+//                } else if (!StringUtils.isEmpty(model.getId()) && StringUtils.isEmpty(processModel.getModelId())) {
+//                    processModel.setModelId(model.getId());
+//                    break;
+//                }
+//            }
             processModelList.add(processModel);
         }
 
