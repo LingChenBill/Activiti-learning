@@ -11,9 +11,11 @@ import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.*;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
+import org.activiti.engine.HistoryService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.history.HistoricActivityInstance;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.Model;
 import org.activiti.engine.repository.ProcessDefinition;
@@ -51,6 +53,9 @@ public class ProcessController {
 
     @Autowired
     private RepositoryService repositoryService;
+
+    @Autowired
+    private HistoryService historyService;
 
     @Autowired
     private RuntimeService runtimeService;
@@ -251,17 +256,19 @@ public class ProcessController {
     }
 
     /**
-     * 读取流程资源xml。
+     * 读取流程资源xml和图片.
      *
      * @param processDefinitionId
      * @param resourceName
+     * @param processInstanceId
      * @param response
      * @return
      * @throws IOException
      */
     @GetMapping("/read-resource")
-    public ResponseEntity readResource(@RequestParam("pdid") String processDefinitionId,
+    public ResponseEntity outputProcessXmlreadResource(@RequestParam("pdid") String processDefinitionId,
                                        @RequestParam("resourceName") String resourceName,
+                                       @RequestParam("processInstanceId") String processInstanceId,
                                        HttpServletResponse response) throws IOException {
         InputStream resourceAsStream = null;
 
@@ -276,7 +283,39 @@ public class ProcessController {
             // 解决图片中文乱码问题.
             BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
             DefaultProcessDiagramGenerator generator = new DefaultProcessDiagramGenerator();
-            resourceAsStream = generator.generateDiagram(bpmnModel, "png", new ArrayList<>(), new ArrayList<>(), "宋体", "宋体", "宋体", processEngine.getProcessEngineConfiguration().getClassLoader(), 1.0);
+
+            // 已执行的节点ID集合.
+            ArrayList<String> executedActivityIdList = new ArrayList<>();
+
+            if (StringUtils.isNotEmpty(processInstanceId)) {
+
+                // 获取流程历史中已执行的节点,并按照节点在流程中执行先后顺序排序.
+                List<HistoricActivityInstance> historicActivityInstanceList = historyService.createHistoricActivityInstanceQuery()
+                        .processInstanceId(processInstanceId)
+                        .orderByHistoricActivityInstanceId()
+                        .desc()
+                        .list();
+
+                int index = 1;
+                for (HistoricActivityInstance historicActivityInstance : historicActivityInstanceList) {
+                    // executedActivityIdList.add(historicActivityInstance.getActivityId());
+                    logger.info("第 {} 个已执行的节点", historicActivityInstance.getActivityId());
+                    index++;
+                }
+
+                if (historicActivityInstanceList != null && historicActivityInstanceList.size() > 0) {
+                    executedActivityIdList.add(historicActivityInstanceList.get(0).getActivityId());
+                }
+            }
+
+            resourceAsStream = generator.generateDiagram(bpmnModel, "png",
+                    executedActivityIdList,
+                    new ArrayList<>(),
+                    "宋体",
+                    "宋体",
+                    "宋体",
+                    processEngine.getProcessEngineConfiguration().getClassLoader(),
+                    1.0);
         }
 
 

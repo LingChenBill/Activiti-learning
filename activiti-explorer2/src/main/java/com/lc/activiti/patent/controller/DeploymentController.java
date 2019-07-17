@@ -1,10 +1,12 @@
 package com.lc.activiti.patent.controller;
 
 import com.lc.activiti.patent.model.ProcessDefinitionModel;
-import org.activiti.engine.ProcessEngine;
-import org.activiti.engine.RepositoryService;
+import org.activiti.engine.*;
+import org.activiti.engine.history.HistoricActivityInstance;
 import org.activiti.engine.repository.DeploymentBuilder;
 import org.activiti.engine.repository.ProcessDefinition;
+import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Task;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +20,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipInputStream;
 
 /**
@@ -37,6 +41,15 @@ public class DeploymentController {
 
     @Autowired
     private RepositoryService repositoryService;
+
+    @Autowired
+    private TaskService taskService;
+
+    @Autowired
+    private RuntimeService runtimeService;
+
+    @Autowired
+    private HistoryService historyService;
 
     @GetMapping(value = "/process-list")
     @ResponseBody
@@ -132,6 +145,38 @@ public class DeploymentController {
 
     }
 
+    /**
+     * 启动流程.
+     *
+     * @param processDefinitionKey
+     */
+    @GetMapping("/startProcess")
+    public ResponseEntity<Map<String, Object>> startProcess(@RequestParam("processDefinitionKey") String processDefinitionKey) {
+        // 启动流程.
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(processDefinitionKey);
+
+        logger.info("processInstanceId = {}", processInstance.getId());
+
+        // 流程实例ID.
+        HashMap<String, Object> resMap = new HashMap<>();
+        resMap.put("processInstanceId", processInstance.getId());
+
+        return new ResponseEntity<>(resMap, HttpStatus.OK);
+    }
+
+    /**
+     * 完成任务.
+     *
+     * @param processInstanceId
+     */
+    @GetMapping("/completeTask")
+    public void startTask(@RequestParam("processInstanceId") String processInstanceId) {
+
+        // 完成当前任务节点.
+        Task task = taskService.createTaskQuery().processInstanceId(processInstanceId).singleResult();
+        taskService.complete(task.getId());
+        logger.info("task id = {}", task.getId());
+    }
 
     /**
      * 画面Bean变换。
@@ -151,6 +196,26 @@ public class DeploymentController {
             model.setVersion(String.valueOf(processDefinition.getVersion()));
             model.setResourceName(processDefinition.getResourceName());
             model.setDiagramResourceName(processDefinition.getDiagramResourceName());
+
+            // 获取流程实例.
+            ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+                    .processDefinitionKey(processDefinition.getKey())
+                    .singleResult();
+
+            if (processInstance != null) {
+                // 设置流程实例ID.
+                model.setProcessInstanceId(processInstance.getId());
+
+                // 获取流程历史中已执行的节点,并按照节点在流程中执行先后顺序排序.
+                List<HistoricActivityInstance> historicActivityInstanceList = historyService.createHistoricActivityInstanceQuery()
+                        .processInstanceId(processInstance.getId())
+                        .orderByHistoricActivityInstanceId()
+                        .desc()
+                        .list();
+
+                // 执行流程节点个数.
+                model.setTaskCount(String.valueOf(historicActivityInstanceList.size()));
+            }
 
             proList.add(model);
         }

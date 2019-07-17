@@ -5,6 +5,7 @@ import lombok.Data;
 /**
  * Class: processDefinition model bean.
  *
+ * @author zyz.
  */
 @Data
 public class ProcessDefinitionModel {
@@ -23,5 +24,8 @@ public class ProcessDefinitionModel {
     private String resourceName;
     // 图片资源名称
     private String diagramResourceName;
-
+    // 流程实例.
+    private String processInstanceId;
+    // 执行流程节点数.
+    private String taskCount;
 }

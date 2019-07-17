@@ -16,9 +16,9 @@ import org.springframework.context.annotation.Bean;
         org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class })
 //@EnableAsync
 @MapperScan(basePackages = "com.lc.activiti.mapper")
-public class App {
+public class ActivitiExplorerApplication {
     public static void main(String[] args) {
-        SpringApplication.run(App.class, args);
+        SpringApplication.run(ActivitiExplorerApplication.class, args);
     }
 
     @Bean
