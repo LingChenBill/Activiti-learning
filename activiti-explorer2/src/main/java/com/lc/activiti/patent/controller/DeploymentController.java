@@ -58,7 +58,10 @@ public class DeploymentController {
 
         List<ProcessDefinition> processDefinitionsList = repositoryService
                 .createProcessDefinitionQuery()
+                .orderByDeploymentId()
+                .desc()
                 .listPage(0, 100);
+
 
         // 画面Bean转换。
         List<ProcessDefinitionModel> proList = getProcessDefinitionModels(processDefinitionsList);
@@ -174,7 +177,15 @@ public class DeploymentController {
 
         // 完成当前任务节点.
         Task task = taskService.createTaskQuery().processInstanceId(processInstanceId).singleResult();
-        taskService.complete(task.getId());
+        if ("译腾".equals(task.getName())) {
+            Map<String, Object> variables = new HashMap<>();
+            // 默认走第一个分支.
+            variables.put("pass", 1);
+            taskService.complete(task.getId(), variables);
+        } else {
+            taskService.complete(task.getId());
+        }
+
         logger.info("task id = {}", task.getId());
     }
 

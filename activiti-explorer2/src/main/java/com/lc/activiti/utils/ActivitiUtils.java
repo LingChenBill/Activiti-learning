@@ -2,6 +2,7 @@ package com.lc.activiti.utils;
 
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.*;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -35,15 +36,23 @@ public class ActivitiUtils {
     /**
      * 创建顺序流。
      *
+     * @param id
      * @param from
      * @param to
+     * @param conditionExpression
      * @return
      */
-    public static SequenceFlow createSequenceFlow(String id, String from, String to) {
+    public static SequenceFlow createSequenceFlow(String id, String from, String to, String conditionExpression) {
         SequenceFlow flow = new SequenceFlow();
         flow.setId(id);
         flow.setSourceRef(from);
         flow.setTargetRef(to);
+
+        // 设置条件表达式.
+        if (StringUtils.isNotEmpty(conditionExpression)) {
+            flow.setConditionExpression(conditionExpression);
+        }
+
         return flow;
     }
 

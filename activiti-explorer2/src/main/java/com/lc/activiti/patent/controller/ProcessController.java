@@ -143,7 +143,7 @@ public class ProcessController {
                 logger.info("element id = {}, name = {}", element.getId(), element.getName());
                 if ("译腾".equals(element.getName())) {
                     tempId = element.getId();
-                } else if ("拆分".equals(element.getName())) {
+                } else if ("再拆分".equals(element.getName())) {
                     tempEndId = element.getId();
                 }
             }
@@ -179,7 +179,7 @@ public class ProcessController {
                 GraphicInfo conGraphicInfo = ActivitiUtils.generateGraphicInfo(770.0, 0.0 + 70 * (i - 0), 80.0, 60.0);
 
                 // 顺序流线(tranTask -> controlTask).
-                SequenceFlow tran2conFlow = ActivitiUtils.createSequenceFlow("tranTaskSF" + i, "tranTask" + i, "controlTask" + i);
+                SequenceFlow tran2conFlow = ActivitiUtils.createSequenceFlow("tranTaskSF" + i, "tranTask" + i, "controlTask" + i, null);
                 List<GraphicInfo> tran2conGraphicInfoList = new ArrayList<>();
                 tran2conGraphicInfoList.add(ActivitiUtils.generateGraphicInfo(490.0, 175.0, 30, 30));
                 tran2conGraphicInfoList.add(ActivitiUtils.generateGraphicInfo(645.0, 175.0, 30, 30));
@@ -191,7 +191,7 @@ public class ProcessController {
                 processes.get(0).addFlowElement(tran2conFlow);
 
                 // 顺序流线(controlTask -> tempEndId).
-                SequenceFlow con2TempEndFlow = ActivitiUtils.createSequenceFlow("controlTaskSF" + i, "controlTask" + i, tempEndId);
+                SequenceFlow con2TempEndFlow = ActivitiUtils.createSequenceFlow("controlTaskSF" + i, "controlTask" + i, tempEndId, null);
                 List<GraphicInfo> con2TempEndGraphicInfoList = new ArrayList<>();
                 con2TempEndGraphicInfoList.add(ActivitiUtils.generateGraphicInfo(490.0, 175.0, 30, 30));
                 con2TempEndGraphicInfoList.add(ActivitiUtils.generateGraphicInfo(645.0, 175.0, 30, 30));
@@ -202,7 +202,20 @@ public class ProcessController {
                 processes.get(0).addFlowElement(con2TempEndFlow);
 
                 // 排他网关流程线.
-                SequenceFlow flowAdd = ActivitiUtils.createSequenceFlow("splitExclusiveGateSF" + i, "splitExclusiveGate", "tranTask" + i);
+                // 设置网关出线的条件
+                String conditionExpression = "";
+                if (i == 1) {
+                    conditionExpression = "${pass=='1'}";
+                } else if (i == 2) {
+                    conditionExpression = "${pass=='2'}";
+                } else {
+                    conditionExpression = "${pass=='3'}";
+                }
+
+                SequenceFlow flowAdd = ActivitiUtils.createSequenceFlow("splitExclusiveGateSF" + i,
+                        "splitExclusiveGate",
+                        "tranTask" + i,
+                        conditionExpression);
                 gateOutgoingFlows.add(flowAdd);
                 processes.get(0).addFlowElement(flowAdd);
 
